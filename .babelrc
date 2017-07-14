@@ -1,0 +1,14 @@
+{
+  "presets": [
+    ["es2015", { "modules": false }] // rollup handles module bundling and fails if babel does it
+  ],
+  "plugins": [
+    "syntax-object-rest-spread",
+    "transform-object-rest-spread"
+  ],
+  "env": {
+    "test": {
+      "presets": ["es2015"] // rollup isn't involved in test running
+    }
+  }
+}

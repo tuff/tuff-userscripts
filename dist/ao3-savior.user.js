@@ -1,0 +1,276 @@
+// ==UserScript==
+// @name          ao3 savior
+// @description   Hide specified works on AO3
+// @namespace     ao3
+// @include       http*://archiveofourown.org/*
+// @grant         none
+// @version       1.9
+// @downloadURL   https://github.com/tuff/ao3-userscripts/raw/master/dist/ao3-savior.user.js
+// ==/UserScript==
+
+
+;(function() {
+var STYLE = '\n  html body .ao3-savior-hidden {\n    display: none;\n  }\n  \n  .ao3-savior-cut {\n    display: none;\n  }\n  \n  .ao3-savior-cut::after {\n    clear: both;\n    content: \'\';\n    display: block;\n  }\n  \n  .ao3-savior-reason {\n    margin-left: 5px;\n  }\n  \n  .ao3-savior-hide-reasons .ao3-savior-reason {\n    display: none;\n  }\n  \n  .ao3-savior-unhide .ao3-savior-cut {\n    display: block;\n  }\n  \n  .ao3-savior-fold {\n    align-items: center;\n    display: flex;\n    justify-content: flex-start;\n  }\n  \n  .ao3-savior-unhide .ao3-savior-fold {\n    background: #ffc68e;\n  }\n  \n  button.ao3-savior-toggle {\n    margin-left: auto;\n  }\n';
+
+function addStyle() {
+  var style = document.createElement('style');
+  style.innerHTML = STYLE;
+  style.className = 'ao3-savior';
+
+  document.head.appendChild(style);
+}
+
+var CSS_NAMESPACE = 'ao3-savior';
+
+var getCut = function getCut(work) {
+  var cut = document.createElement('div');
+
+  cut.className = CSS_NAMESPACE + '-cut';
+  cut.innerHTML = work.innerHTML;
+
+  return cut;
+};
+
+var getFold = function getFold(reason) {
+  var fold = document.createElement('div');
+  var note = document.createElement('span');
+
+  fold.className = CSS_NAMESPACE + '-fold';
+  note.className = CSS_NAMESPACE + '-note';
+
+  note.innerHTML = 'This work is hidden!';
+
+  fold.appendChild(note);
+  fold.append(' ');
+  fold.appendChild(getReasonSpan(reason));
+  fold.appendChild(getToggleButton());
+
+  return fold;
+};
+
+var getToggleButton = function getToggleButton() {
+  var button = document.createElement('button');
+  var unhideClassFragment = ' ' + CSS_NAMESPACE + '-unhide';
+
+  button.innerHTML = 'Unhide';
+  button.className = CSS_NAMESPACE + '-toggle';
+
+  button.addEventListener('click', function (event) {
+    var work = event.target.closest('.' + CSS_NAMESPACE + '-work');
+
+    if (work.className.indexOf(unhideClassFragment) !== -1) {
+      work.className = work.className.replace(unhideClassFragment, '');
+      work.querySelector('.' + CSS_NAMESPACE + '-note').innerHTML = 'This work is hidden.';
+      event.target.innerHTML = 'Unhide';
+    } else {
+      work.className += unhideClassFragment;
+      work.querySelector('.' + CSS_NAMESPACE + '-note').innerHTML = 'This work was hidden.';
+      event.target.innerHTML = 'Hide';
+    }
+  });
+
+  return button;
+};
+
+var getReasonSpan = function getReasonSpan(reason) {
+  var span = document.createElement('span');
+  var tag = reason.tag,
+      author = reason.author,
+      title = reason.title,
+      summary = reason.summary;
+
+  var text = void 0;
+
+  if (tag) {
+    text = 'tags include <strong>' + tag + '</strong>';
+  } else if (author) {
+    text = 'authors include <strong>' + author + '</strong>';
+  } else if (title) {
+    text = 'title is <strong>' + title + '</strong>';
+  } else if (summary) {
+    text = 'summary includes <strong>' + summary + '</strong>';
+  }
+
+  if (text) {
+    span.innerHTML = '(Reason: ' + text + '.)';
+  }
+
+  span.className = CSS_NAMESPACE + '-reason';
+
+  return span;
+};
+
+function blockWork(work, reason, config) {
+  if (!reason) return;
+
+  var showReasons = config.showReasons,
+      showPlaceholders = config.showPlaceholders;
+
+
+  if (showPlaceholders) {
+    var fold = getFold(reason);
+    var cut = getCut(work);
+
+    work.className += ' ' + CSS_NAMESPACE + '-work';
+    work.innerHTML = '';
+    work.appendChild(fold);
+    work.appendChild(cut);
+
+    if (!showReasons) {
+      work.className += ' ' + CSS_NAMESPACE + '-hide-reasons';
+    }
+  } else {
+    work.className += ' ' + CSS_NAMESPACE + '-hidden';
+  }
+}
+
+function matchTermsWithWildCard(term, pattern) {
+  if (term.toLowerCase() === pattern.toLowerCase()) return true;
+  if (pattern.indexOf('*') === -1) return false;
+
+  var regexified = pattern.replace(/\*/g, '.*?');
+  var regex = new RegExp('^' + regexified + '$', 'i');
+
+  return regex.test(term);
+}
+
+var isTagWhitelisted = function isTagWhitelisted(tags, whitelist) {
+  var whitelistLookup = whitelist.reduce(function (lookup, tag) {
+    lookup[tag] = true;
+    return lookup;
+  }, {});
+
+  return tags.some(function (tag) {
+    return !!whitelistLookup[tag];
+  });
+};
+
+var findBlacklistedItem = function findBlacklistedItem(list, blacklist, comparator) {
+  var matchingEntry = void 0;
+
+  list.some(function (item) {
+    blacklist.some(function (entry) {
+      var matched = comparator(item, entry);
+
+      if (matched) matchingEntry = entry;
+
+      return matched;
+    });
+  });
+
+  return matchingEntry;
+};
+
+var equals = function equals(a, b) {
+  return a === b;
+};
+var contains = function contains(a, b) {
+  return a.indexOf(b) !== -1;
+};
+
+function getBlockReason(_ref, _ref2) {
+  var _ref$authors = _ref.authors,
+      authors = _ref$authors === undefined ? [] : _ref$authors,
+      _ref$title = _ref.title,
+      title = _ref$title === undefined ? '' : _ref$title,
+      _ref$tags = _ref.tags,
+      tags = _ref$tags === undefined ? [] : _ref$tags,
+      _ref$summary = _ref.summary,
+      summary = _ref$summary === undefined ? '' : _ref$summary;
+  var _ref2$authorBlacklist = _ref2.authorBlacklist,
+      authorBlacklist = _ref2$authorBlacklist === undefined ? [] : _ref2$authorBlacklist,
+      _ref2$titleBlacklist = _ref2.titleBlacklist,
+      titleBlacklist = _ref2$titleBlacklist === undefined ? [] : _ref2$titleBlacklist,
+      _ref2$tagBlacklist = _ref2.tagBlacklist,
+      tagBlacklist = _ref2$tagBlacklist === undefined ? [] : _ref2$tagBlacklist,
+      _ref2$tagWhitelist = _ref2.tagWhitelist,
+      tagWhitelist = _ref2$tagWhitelist === undefined ? [] : _ref2$tagWhitelist,
+      _ref2$summaryBlacklis = _ref2.summaryBlacklist,
+      summaryBlacklist = _ref2$summaryBlacklis === undefined ? [] : _ref2$summaryBlacklis;
+
+
+  if (isTagWhitelisted(tags, tagWhitelist)) return null;
+
+  var tag = findBlacklistedItem(tags, tagBlacklist, matchTermsWithWildCard);
+  if (tag) return { tag: tag };
+
+  var author = findBlacklistedItem(authors, authorBlacklist, equals);
+  if (author) return { author: author };
+
+  if (titleBlacklist.some(function (entry) {
+    return title === entry;
+  })) return { title: title };
+
+  var summaryTerm = findBlacklistedItem([summary], summaryBlacklist, contains);
+  if (summaryTerm) return { summary: summaryTerm };
+
+  return null;
+}
+
+function isDebug(location) {
+  return location.hostname === 'localhost' || /\ba3sv-debug\b/.test(location.search);
+}
+
+var getText = function getText(element) {
+  return element.textContent.replace(/^\s*|\s*$/g, '');
+};
+var selectTextsIn = function selectTextsIn(root, selector) {
+  return Array.from(root.querySelectorAll(selector)).map(getText);
+};
+
+function selectWorkBlockables(workContainerElement) {
+  return {
+    authors: selectTextsIn(workContainerElement, 'a[rel=author]'),
+    tags: [].concat(selectTextsIn(workContainerElement, 'a.tag'), selectTextsIn(workContainerElement, '.required-tags .text')),
+    title: selectTextsIn(workContainerElement, '.header .heading a:first-child')[0],
+    summary: selectTextsIn(workContainerElement, 'blockquote.summary')[0]
+  };
+}
+
+setTimeout(function () {
+  var debugMode = isDebug(window.location);
+  var config = window.ao3SaviorConfig;
+  var blocked = 0;
+  var total = 0;
+
+  if (debugMode) {
+    console.groupCollapsed('AO3 SAVIOR');
+
+    if (!config) {
+      console.warn('Exiting due to missing config.');
+      return;
+    }
+  }
+
+  addStyle();
+
+  Array.from(document.querySelectorAll('li.blurb')).forEach(function (work) {
+    var blockables = selectWorkBlockables(work);
+    var reason = getBlockReason(blockables, config);
+
+    total++;
+
+    if (reason) {
+      blockWork(work, reason, config);
+      blocked++;
+
+      if (debugMode) {
+        console.groupCollapsed('- blocked ' + work.id);
+        console.log(work, reason);
+        console.groupEnd();
+      }
+    } else if (debugMode) {
+      console.groupCollapsed('  skipped ' + work.id);
+      console.log(work);
+      console.groupEnd();
+    }
+  });
+
+  if (debugMode) {
+    console.log('Blocked ' + blocked + ' out of ' + total + ' works');
+    console.groupEnd();
+  }
+}, 10);
+}());
+
+//# sourceMappingURL=ao3-savior.user.js.map
