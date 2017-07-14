@@ -5,7 +5,7 @@
 // @include       http*://archiveofourown.org/*
 // @grant         none
 // @version       1.0
-// @downloadURL   https://github.com/tuff/ao3-userscripts/raw/master/dist/ao3-savior-config.user.js
+// @downloadURL   https://github.com/tuff/tuff-userscripts/raw/master/dist/ao3-savior-config.user.js
 // ==/UserScript==
 
 
