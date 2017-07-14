@@ -15,7 +15,10 @@ tag.src = 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js
 document.head.appendChild(tag);
 
 
-function scrapeHostas(url) {
+const NAMESPACE = 'HLS-script';
+
+
+function scrapeNames(url) {
   const xhr = new XMLHttpRequest();
 
   const makeRequest = (resolve, reject) => {
@@ -45,9 +48,10 @@ function scrapeHostas(url) {
     const hostas = tds.reduce((list, td) => {
       const names = td.innerHTML
         .split(/<br\/?>/ig)
-        .map( line => line.replace(/^\W*|\W*$/gi, '') );
+        .map( line => line.replace(/^\W+|\W+$/gi, '') )
+        .filter(name => !!name);
 
-      return list.concat( _.compact(names) );
+      return list.concat(names);
     }, []);
 
     return hostas;
@@ -57,7 +61,62 @@ function scrapeHostas(url) {
     .then(scrape);
 }
 
+function getListLinks() {
+  return [ ...document.querySelectorAll('table a') ]
+    .filter(a =>
+      a.href.indexOf('//www.hostalists.org') > -1 &&
+      a.href.indexOf('hosta_list') > -1 &&
+      a.textContent.toLowerCase().indexOf(' hostas') > 0
+    );
+}
 
-scrapeHostas('http://www.hostalists.org/hosta_list_blh.php')
-  .then(result => window.RESULT = result)
-  .catch(console.log);
+function loadStorage() {
+  const storageString = window.localStorage[NAMESPACE];
+
+  try {
+    window[NAMESPACE] = storageString && JSON.parse(storageString);
+  } catch (ex) {
+    console.warn(`${NAMESPACE}: bad string in localStorage`);
+  }
+}
+
+function saveStorage() {
+  window.localStorage[NAMESPACE] = JSON.stringify(window[NAMESPACE]);
+}
+
+function buildStore(rebuild) {
+  loadStorage();
+
+  if (window[NAMESPACE] && !rebuild) return;
+
+  const links = getListLinks();
+  const lists = {};
+
+  Promise.all(links.map(link => {
+      const listName = link.textContent.replace(/^\W+|\W+$| Hostas/gi, '');
+
+      return scrapeNames(link.href)
+        .then(list => {
+          if (!list.length) {
+            console.warn(`${NAMESPACE}: found 0 hostas at ${link.href}`);
+          }
+          lists[listName] = list;
+        })
+        .catch(() => console.warn(
+          `${NAMESPACE}: couldn't load hostas from [${listName}](${link.href})`));
+    }))
+    .then(() => {
+      window[NAMESPACE] = lists;
+      saveStorage();
+    });
+}
+
+
+buildStore(true);
+
+
+
+
+// scrapeNames('http://www.hostalists.org/hosta_list_lut.php')
+//   .then(result => window.RESULT = result)
+//   .catch(console.log);
