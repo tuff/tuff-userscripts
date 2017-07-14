@@ -8,7 +8,7 @@
 // @include     http*://archiveofourown.org/users/*/readings*
 // @grant       none
 // @version     1.3
-// @downloadURL https://github.com/tuff-ghost/ao3-userscripts/raw/master/ao3_download_buttons.user.js
+// @downloadURL https://github.com/tuff/tuff-userscripts/raw/master/uncompiled/ao3_download_buttons.user.js
 // ==/UserScript==
 
 (function($) {
@@ -32,7 +32,7 @@
                         'top': '-0.5em',
                         'white-space': 'nowrap'
                     });
-                    
+
                 $.each(exts, function(i, ext) {
                     $('<li>')
                         .append($('<a>').addClass(ext)
@@ -41,16 +41,16 @@
                         )
                         .appendTo(ul);
                 });
-                
+
                 ul.append($('<li>').append($('<a>').addClass('close')
                         .attr('title', 'Close Download Options')
                         .css({'cursor': 'pointer', 'display': 'inline'}).text('X')
                     )
                 );
-                
+
                 return ul;
             })();
-            
+
     works.each(function() {
         var work = $(this),
             author = work.find('a.login.author').first().text() || 'Anonymous',
@@ -72,15 +72,15 @@
                 ul.toggle();
                 link.toggleClass('open close');
             };
-            
+
         ul.find('li a').each(function() {
-            if ($(this).attr('href')) { 
+            if ($(this).attr('href')) {
                 $(this).attr('href', uri +$(this).attr('href'));
             }
         });
-        
+
         link.add(ul.find('li a').last()).click(_toggle);
-        
+
         div.append(link, ul.hide())
             .appendTo(work);
     });

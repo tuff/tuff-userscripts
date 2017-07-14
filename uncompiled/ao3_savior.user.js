@@ -5,7 +5,7 @@
 // @include   http*://archiveofourown.org/*
 // @grant     none
 // @version   1.7
-// @downloadURL https://github.com/tuff-ghost/ao3-userscripts/raw/master/ao3_savior.user.user.js
+// @downloadURL https://github.com/tuff/tuff-userscripts/raw/master/uncompiled/ao3_savior.user.user.js
 // ==/UserScript==
 
 
@@ -25,7 +25,7 @@ window.ao3SaviorConfig = {
 
   tagBlacklist: ['dobby', 'jar jar binks', '*mimes'],
   // excludes works with a tag that matches at least one term. Use * for wildcard
-  
+
   tagWhitelist: [],
   // if a work contains any of these tags, it will not be blocked, even if it matches one of the blacklists
 
@@ -47,10 +47,10 @@ window.ao3SaviorConfig = {
       blockWork($(this), reason)
     }
   });
-  
+
   function getConfig() {
     var config = window.ao3SaviorConfig || {};
-    
+
     config.showReasons = (config.showReasons !== undefined) ? config.showReasons : true;
     config.showPlaceholders = (config.showPlaceholders !== undefined) ? config.showPlaceholders : true;
     config.authorBlacklist = config.authorBlacklist || [];
@@ -58,10 +58,10 @@ window.ao3SaviorConfig = {
     config.tagBlacklist = config.tagBlacklist || [];
     config.tagWhitelist = config.tagWhitelist || [];
     config.summaryBlacklist = config.summaryBlacklist || [];
-    
+
     return config;
   }
-  
+
   function blockWork(work, reason) {
     var cut = $('<div>').addClass('cut').html(work.html()),
       reason = '(' +reason +'.)',
@@ -87,7 +87,7 @@ window.ao3SaviorConfig = {
       cut.add(fold.children('.'+_toggleClass)).toggle();
       $(this).text(cut.is(':visible') ? 'Hide' : 'Unhide');
     })
-    
+
     function makeFold() {
       return $('<p>').addClass('fold').append(
         $('<span>').addClass(_toggleClass).text('This work is hidden! '),
@@ -103,7 +103,7 @@ window.ao3SaviorConfig = {
       );
     }
   }
-  
+
   function shouldBlockWork(work) {
     var authors = work.find('a[rel=author]'),
       title = work.find('.header .heading a:first-child'),
@@ -117,7 +117,7 @@ window.ao3SaviorConfig = {
       }
     }
 
-    for (var i = 0, tag; tag = $(tags[i]).text(); i++) {      
+    for (var i = 0, tag; tag = $(tags[i]).text(); i++) {
       for (var j = 0, blTag; blTag = _cfg.tagBlacklist[j]; j++) {
         if (termsMatch(tag, blTag)) {
           return reason +'tags include <strong>' +blTag +'</strong>';
@@ -142,11 +142,11 @@ window.ao3SaviorConfig = {
         return reason +'author is <strong>' +blAuthor +'</strong>';
       }
     }
-    
+
     var trimmedTitleText = title.text().replace(/^\s+|\s$/, '');
     for (var i = 0, blTitle; blTitle = _cfg.titleBlacklist[i]; i++) {
       if (trimmedTitleText == blTitle) {
-        return reason +'title is <strong>' +blTitle +'</strong>';          
+        return reason +'title is <strong>' +blTitle +'</strong>';
       }
     }
 
@@ -157,14 +157,14 @@ window.ao3SaviorConfig = {
     }
 
     return '';
-    
+
     function termsMatch(testTerm, listTerm) {
       testTerm = testTerm.toLowerCase();
       listTerm = listTerm.toLowerCase();
       if (testTerm == listTerm) { return true; }
 
       if (listTerm.indexOf('*') == -1) return false;
-      
+
       var parts = listTerm.split('*'),
         prevPartIndex = 0,
         firstPart,
@@ -178,7 +178,7 @@ window.ao3SaviorConfig = {
         }
         prevPartIndex = partIndex + part.length;
       }
-      
+
       firstPart = parts[0];
       lastPart = parts[parts.length-1];
 

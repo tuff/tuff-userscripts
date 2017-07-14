@@ -5,7 +5,7 @@
 // @include     http*://archiveofourown.org/*works*
 // @grant       none
 // @version     1.2
-// @downloadURL https://github.com/tuff-ghost/ao3-userscripts/raw/master/ao3_saved_filters.user.js
+// @downloadURL https://github.com/tuff/tuff-userscripts/raw/master/uncompiled/ao3_saved_filters.user.js
 // ==/UserScript==
 
 (function($) {
@@ -141,7 +141,7 @@
 
         works.find('.heading').first().after(
             $('<div>').addClass('prev-search').append(prevSearch));
-    } else if ((localStorage[globalKey] && localStorage[globalKey+'-on'] !== 'false') || 
+    } else if ((localStorage[globalKey] && localStorage[globalKey+'-on'] !== 'false') ||
             (localStorage[fandomKey] && localStorage[fandomKey+'-on'] !== 'false')) {
         form.submit();
     }

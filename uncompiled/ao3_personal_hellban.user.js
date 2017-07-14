@@ -8,15 +8,15 @@
 // @include     http*://archiveofourown.org/comments*
 // @grant       none
 // @version     1.5
-// @downloadURL https://github.com/tuff-ghost/ao3-userscripts/raw/master/ao3_personal_hellban.user.js
+// @downloadURL https://github.com/tuff/tuff-userscripts/raw/master/uncompiled/ao3_personal_hellban.user.js
 // ==/UserScript==
 
 /**** CONFIG ********************/
 window.ao3hellban = {
 
-    showToggle: true, 
+    showToggle: true,
     // set to false if you don't want to see a count of hidden comments & toggle ability
-    
+
     blacklist: [
         // '##GUEST:*', // uncomment this if you want to block comments by all guest users
         // '##GUEST:Bender', // uncomment if you want to block guest user who signs as 'Bender'
@@ -57,21 +57,21 @@ window.ao3hellban = {
                     a.remove();
                 }
             });
-            
+
             var remainingKudos = kudosContainer.children('a'),
                 kudoNodes = kudosContainer[0].childNodes,
                 lastText = kudoNodes[kudoNodes.length-1];
-                
+
             kudosContainer.empty();
-            
+
             if (!remainingKudos[0]) {
                 kudosContainer.remove();
                 return;
             }
-            
+
             remainingKudos.each(function(i) {
                 kudosContainer.append(this);
-                if (i < remainingKudos.length-2) { 
+                if (i < remainingKudos.length-2) {
                     kudosContainer.append(', ');
                 } else if (i == remainingKudos.length-2) {
                     if (remainingKudos.length > 2) {
@@ -80,7 +80,7 @@ window.ao3hellban = {
                     kudosContainer.append(' and ');
                 }
             });
-            
+
             kudosContainer.append(lastText);
         },
         nukedComments,
@@ -104,9 +104,9 @@ window.ao3hellban = {
 
                 userName = (userName || '').replace(/^\/users\//, '');
                 userName = userName.substring(0, userName.indexOf('/'));
-                
+
                 if (guestName) guestName = guestName.replace(/^\s+|\s+$/g, '');
-                
+
                 if (blacklistString.indexOf('|'+userName+'|') != -1 ||
                         isGuest && bannedGuests[guestName] ||
                         isGuest && banAllGuests) {
@@ -117,7 +117,7 @@ window.ao3hellban = {
             if (nukedComments) {
                 var toggleButton = $('<span>').addClass('action hellbanned-comments-toggle')
                         .click(toggleCommentVisibility);
-                        
+
                 placeholder.children('.thread').prepend(
                     $('<p>').text('* ' +nukedComments +' comments hidden ').addClass('hellban-info')
                         .append(toggleButton)
