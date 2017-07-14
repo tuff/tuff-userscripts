@@ -5,6 +5,7 @@
 // @include       https://jira.*.com/*RapidBoard*
 // @grant         none
 // @version       0.1
+// @downloadURL   https://github.com/tuff/tuff-userscripts/raw/master/uncompiled/jira-backlog-sroll.user.js
 // ==/UserScript==
 
 
