@@ -16,13 +16,16 @@ document.head.appendChild(tag);
 
 
 const NAMESPACE = 'HLS-script';
+const SCRAPE_BATCH_SIZE = 10;
+const SCRAPE_BATCH_DELAY = 500;
+const REQUEST_TIMEOUT = 30000;
 
 
 function scrapeNames(url) {
   const xhr = new XMLHttpRequest();
 
   const makeRequest = (resolve, reject) => {
-    const timeout = window.setTimeout(reject, 3000);
+    const timeout = window.setTimeout(reject, REQUEST_TIMEOUT);
 
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4 && xhr.status === 200) {
@@ -92,23 +95,38 @@ function buildStore(rebuild) {
   const links = getListLinks();
   const lists = {};
 
-  Promise.all(links.map(link => {
-      const listName = link.textContent.replace(/^\W+|\W+$| Hostas/gi, '');
+  const scrapeLink = link => {
+    const listName = link.textContent.replace(/^\W+|\W+$| Hostas/gi, '');
 
-      return scrapeNames(link.href)
-        .then(list => {
-          if (!list.length) {
-            console.warn(`${NAMESPACE}: found 0 hostas at ${link.href}`);
-          }
-          lists[listName] = list;
-        })
-        .catch(() => console.warn(
-          `${NAMESPACE}: couldn't load hostas from [${listName}](${link.href})`));
-    }))
-    .then(() => {
-      window[NAMESPACE] = lists;
-      saveStorage();
-    });
+    return scrapeNames(link.href)
+      .then(list => {
+        if (!list.length) {
+          console.warn(`${NAMESPACE}: found 0 hostas at [${listName}](${link.href})`);
+        }
+        lists[listName] = list;
+      })
+      .catch(() => console.warn(
+        `${NAMESPACE}: couldn't load hostas from [${listName}](${link.href})`));
+  };
+
+  (new Promise((resolve, reject) => {
+    const interval = window.setInterval(() => {
+      const batch = links.splice(0, SCRAPE_BATCH_SIZE);
+      const promises = [];
+
+      if (!batch.length) {
+        window.clearInterval(interval);
+        resolve(promises);
+      }
+
+      promises.push( ...batch.map(scrapeLink) );
+    }, SCRAPE_BATCH_DELAY);
+  }))
+  .then(requests => Promise.all(requests))
+  .then(() => {
+    window[NAMESPACE] = lists;
+    saveStorage();
+  });
 }
 
 
