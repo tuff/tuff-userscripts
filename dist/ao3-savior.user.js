@@ -4,7 +4,7 @@
 // @namespace     ao3
 // @include       http*://archiveofourown.org/*
 // @grant         none
-// @version       1.9
+// @version       1.10
 // @downloadURL   https://github.com/tuff/tuff-userscripts/raw/master/dist/ao3-savior.user.js
 // ==/UserScript==
 
@@ -211,6 +211,8 @@ function isDebug(location) {
   return location.hostname === 'localhost' || /\ba3sv-debug\b/.test(location.search);
 }
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var getText = function getText(element) {
   return element.textContent.replace(/^\s*|\s*$/g, '');
 };
@@ -218,18 +220,26 @@ var selectTextsIn = function selectTextsIn(root, selector) {
   return Array.from(root.querySelectorAll(selector)).map(getText);
 };
 
-function selectWorkBlockables(workContainerElement) {
+function selectFromWork(container) {
+  return _extends({}, selectFromBlurb(container), {
+    title: selectTextsIn(container, '.title')[0],
+    summary: selectTextsIn(container, '.summary .userstuff')[0]
+  });
+}
+
+function selectFromBlurb(blurb) {
   return {
-    authors: selectTextsIn(workContainerElement, 'a[rel=author]'),
-    tags: [].concat(selectTextsIn(workContainerElement, 'a.tag'), selectTextsIn(workContainerElement, '.required-tags .text')),
-    title: selectTextsIn(workContainerElement, '.header .heading a:first-child')[0],
-    summary: selectTextsIn(workContainerElement, 'blockquote.summary')[0]
+    authors: selectTextsIn(blurb, 'a[rel=author]'),
+    tags: [].concat(selectTextsIn(blurb, 'a.tag'), selectTextsIn(blurb, '.required-tags .text')),
+    title: selectTextsIn(blurb, '.header .heading a:first-child')[0],
+    summary: selectTextsIn(blurb, 'blockquote.summary')[0]
   };
 }
 
 setTimeout(function () {
   var debugMode = isDebug(window.location);
   var config = window.ao3SaviorConfig;
+  var workContainer = document.querySelector('#main.works-show') || document.querySelector('#main.chapters-show');
   var blocked = 0;
   var total = 0;
 
@@ -244,27 +254,38 @@ setTimeout(function () {
 
   addStyle();
 
-  Array.from(document.querySelectorAll('li.blurb')).forEach(function (work) {
-    var blockables = selectWorkBlockables(work);
+  Array.from(document.querySelectorAll('li.blurb')).forEach(function (blurb) {
+    var blockables = selectFromBlurb(blurb);
     var reason = getBlockReason(blockables, config);
 
     total++;
 
     if (reason) {
-      blockWork(work, reason, config);
+      blockWork(blurb, reason, config);
       blocked++;
 
       if (debugMode) {
-        console.groupCollapsed('- blocked ' + work.id);
-        console.log(work, reason);
+        console.groupCollapsed('- blocked ' + blurb.id);
+        console.log(blurb, reason);
         console.groupEnd();
       }
     } else if (debugMode) {
-      console.groupCollapsed('  skipped ' + work.id);
-      console.log(work);
+      console.groupCollapsed('  skipped ' + blurb.id);
+      console.log(blurb);
       console.groupEnd();
     }
   });
+
+  if (config.alertOnVisit && workContainer && document.referrer.indexOf('//archiveofourown.org') === -1) {
+
+    var blockables = selectFromWork(workContainer);
+    var reason = getBlockReason(blockables, config);
+
+    if (reason) {
+      blocked++;
+      blockWork(workContainer, reason, config);
+    }
+  }
 
   if (debugMode) {
     console.log('Blocked ' + blocked + ' out of ' + total + ' works');

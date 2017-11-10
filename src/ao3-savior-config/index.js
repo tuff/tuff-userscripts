@@ -12,6 +12,9 @@ window.ao3SaviorConfig = {
   // Set to false if you don't want to see the expandable "This work is hidden!" boxes.
   showPlaceholders: true,
 
+  // Set to true if you want to be alerted when visiting a blacklisted work from outside AO3
+  alertOnVisit: false,
+
   // Exclude works with an author that exactly matches at least one term.
   authorBlacklist: [
     'Hated Author 1',

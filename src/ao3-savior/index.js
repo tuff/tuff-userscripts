@@ -2,11 +2,13 @@ import addStyle from './add-style';
 import blockWork from './block-work';
 import getBlockReason from './get-block-reason';
 import isDebug from './is-debug';
-import selectWorkBlockables from './select-work-blockables';
+import {selectFromBlurb, selectFromWork} from './select-blockables';
 
 setTimeout(() => {
   const debugMode = isDebug(window.location);
   const config = window.ao3SaviorConfig;
+  const workContainer = document.querySelector('#main.works-show') || 
+    document.querySelector('#main.chapters-show');
   let blocked = 0;
   let total = 0;
 
@@ -22,30 +24,42 @@ setTimeout(() => {
   addStyle();
 
   Array.from(document.querySelectorAll('li.blurb'))
-    .forEach(work => {
-      const blockables = selectWorkBlockables(work);
+    .forEach(blurb => {
+      const blockables = selectFromBlurb(blurb);
       const reason = getBlockReason(blockables, config);
 
       total++;
 
       if (reason) {
-        blockWork(work, reason, config);
+        blockWork(blurb, reason, config);
         blocked++;
 
         if (debugMode) {
-          console.groupCollapsed(`- blocked ${work.id}`);
-          console.log(work, reason);
+          console.groupCollapsed(`- blocked ${blurb.id}`);
+          console.log(blurb, reason);
           console.groupEnd();
         }
       } else if (debugMode) {
-        console.groupCollapsed(`  skipped ${work.id}`);
-        console.log(work);
+        console.groupCollapsed(`  skipped ${blurb.id}`);
+        console.log(blurb);
         console.groupEnd();
       }
     });
 
-    if (debugMode) {
-      console.log(`Blocked ${blocked} out of ${total} works`);
-      console.groupEnd();
+  if (config.alertOnVisit && workContainer &&
+    document.referrer.indexOf('//archiveofourown.org') === -1) {
+
+    const blockables = selectFromWork(workContainer);
+    const reason = getBlockReason(blockables, config);
+    
+    if (reason) {
+      blocked++;
+      blockWork(workContainer, reason, config)
     }
+  }
+
+  if (debugMode) {
+    console.log(`Blocked ${blocked} out of ${total} works`);
+    console.groupEnd();
+  }
 }, 10);
