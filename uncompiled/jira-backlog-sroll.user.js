@@ -3,6 +3,7 @@
 // @description   Scroll-to buttons for JIRA backlog
 // @namespace     jira-backlog-scroll
 // @include       https://jira.*.com/*RapidBoard*
+// @include       https://*.atlassian.net/*RapidBoard*
 // @grant         none
 // @version       0.1
 // @downloadURL   https://github.com/tuff/tuff-userscripts/raw/master/uncompiled/jira-backlog-sroll.user.js
