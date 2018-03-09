@@ -57,4 +57,15 @@ describe('matchTermsWithWildCard', function() {
     assert(matched);
     assert(!unmatched);
   });
+
+  it('should match `*RPF)`', function() {
+    const term = 'Natuzzi (Hockey RPF)';
+    const miss = 'not RPF';
+    const pattern = '*RPF)';
+    const matched = matchTermsWithWildCard(term, pattern);
+    const unmatched = matchTermsWithWildCard(miss, pattern);
+
+    assert(matched);
+    assert(!unmatched);
+  });
 });

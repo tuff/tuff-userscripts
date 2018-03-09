@@ -124,14 +124,19 @@ function blockWork(work, reason, config) {
   }
 }
 
-function matchTermsWithWildCard(term, pattern) {
-  if (term.toLowerCase() === pattern.toLowerCase()) return true;
+function matchTermsWithWildCard(term0, pattern0) {
+  var term = term0.toLowerCase();
+  var pattern = pattern0.toLowerCase();
+
+  if (term === pattern) return true;
   if (pattern.indexOf('*') === -1) return false;
 
-  var regexified = pattern.replace(/\*/g, '.*?');
-  var regex = new RegExp('^' + regexified + '$', 'i');
+  var lastMatchedIndex = pattern.split('*').filter(Boolean).reduce(function (prevIndex, chunk) {
+    var matchedIndex = term.indexOf(chunk);
+    return prevIndex >= 0 && prevIndex <= matchedIndex ? matchedIndex : -1;
+  }, 0);
 
-  return regex.test(term);
+  return lastMatchedIndex >= 0;
 }
 
 var isTagWhitelisted = function isTagWhitelisted(tags, whitelist) {
