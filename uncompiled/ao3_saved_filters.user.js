@@ -4,7 +4,7 @@
 // @namespace   ao3
 // @include     http*://archiveofourown.org/*works*
 // @grant       none
-// @version     1.2
+// @version     1.3
 // @downloadURL https://github.com/tuff/tuff-userscripts/raw/master/uncompiled/ao3_saved_filters.user.js
 // ==/UserScript==
 
