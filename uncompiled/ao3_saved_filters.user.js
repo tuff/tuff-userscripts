@@ -17,7 +17,7 @@
     if (!works[0] || !form[0]) return;
 
     var fandomName = (function() {
-            var fandom = $('#tag_category_fandom label').first().text(),
+            var fandom = $('#include_fandom_tags label').first().text(),
                 fandomCount = parseInt(
                         fandom.substring(fandom.lastIndexOf('(')+1, fandom.lastIndexOf(')'))
                     ),
