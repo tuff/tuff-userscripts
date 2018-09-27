@@ -4,7 +4,7 @@
 // @namespace     ao3
 // @include       http*://archiveofourown.org/*
 // @grant         none
-// @version       1.11
+// @version       1.12
 // @downloadURL   https://github.com/tuff/tuff-userscripts/raw/master/dist/ao3-savior.user.js
 // ==/UserScript==
 
@@ -26,7 +26,9 @@ var getCut = function getCut(work) {
   var cut = document.createElement('div');
 
   cut.className = CSS_NAMESPACE + '-cut';
-  cut.innerHTML = work.innerHTML;
+  Array.from(work.childNodes).forEach(function (child) {
+    return cut.appendChild(child);
+  });
 
   return cut;
 };
