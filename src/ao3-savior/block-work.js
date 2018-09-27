@@ -4,7 +4,7 @@ const getCut = (work) => {
   const cut = document.createElement('div');
 
   cut.className = `${CSS_NAMESPACE}-cut`;
-  cut.innerHTML = work.innerHTML;
+  Array.from(work.childNodes).forEach(child => cut.appendChild(child));
 
   return cut;
 };
