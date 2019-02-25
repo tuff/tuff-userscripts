@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name        ao3 download buttons
+// @name    ao3 download buttons
 // @description Adds download buttons to each work blurb on AO3's works index pages.
 // @namespace   ao3
 // @include     http*://archiveofourown.org/*works*
@@ -7,82 +7,82 @@
 // @include     http*://archiveofourown.org/users/*/bookmarks*
 // @include     http*://archiveofourown.org/users/*/readings*
 // @grant       none
-// @version     1.3
+// @version     2.0
 // @downloadURL https://github.com/tuff/tuff-userscripts/raw/master/uncompiled/ao3_download_buttons.user.js
 // ==/UserScript==
 
-(function($) {
+(function () {
+  const blurbs = Array.from(document.querySelectorAll('li.blurb'));
 
-    var works = $('.work.index li.work, .bookmark.index li.bookmark');
-    if (!works[0]) return;
+  if (!blurbs.length) {
+    return;
+  }
 
-    var exts = ['mobi', 'epub', 'pdf', 'html'],
-        uriTemplate = '/downloads/{au}/{author}/{id}/{title}.',
-        divProto = $('<div>').addClass('download actions').attr('aria-haspopup', 'true')
-            .css({
-                'position': 'absolute',
-                'right': '7em',
-                'top': '0.5em',
-            }),
-        linkProto = $('<a>').attr('title', 'Download').addClass('open').text('Download'),
-        ulProto = (function() {
-                var ul = $('<ul>').addClass('toggled secondary').css({
-                        'position': 'absolute',
-                        'right': '7em',
-                        'top': '-0.5em',
-                        'white-space': 'nowrap'
-                    });
+  const style = document.createElement('style');
 
-                $.each(exts, function(i, ext) {
-                    $('<li>')
-                        .append($('<a>').addClass(ext)
-                            .attr('href', ext)
-                            .text(ext.toUpperCase())
-                        )
-                        .appendTo(ul);
-                });
+  style.innerHTML = `
+    .blurb .download.actions {
+      position: absolute;
+      right: 7em;
+      top: 0.5em;
+      white-space: nowrap;
+    }
 
-                ul.append($('<li>').append($('<a>').addClass('close')
-                        .attr('title', 'Close Download Options')
-                        .css({'cursor': 'pointer', 'display': 'inline'}).text('X')
-                    )
-                );
+    .blurb .download .expandable {
+      position: absolute;
+      right: calc(100% + 0.5em);
+      top: -0.5em;
+    }
 
-                return ul;
-            })();
+    .blurb .download .expandable li {
+      display: inline-block;
+      margin: 0;
+    }
+  `;
 
-    works.each(function() {
-        var work = $(this),
-            author = work.find('a.login.author').first().text() || 'Anonymous',
-            titleLink = work.find('.header.module .heading a').first(),
-            id = (function() {
-                var id = titleLink.attr('href');
-                id = id.substring(id.indexOf('works/')+'works/'.length);
-                return id;
-            })(),
-            title = encodeURIComponent(titleLink.text().split(',').join('')),
-            uri = uriTemplate.replace('{author}', author)
-                .replace('{au}', author.substring(0,2))
-                .replace('{id}', id)
-                .replace('{title}', title),
-            link = linkProto.clone(),
-            ul = ulProto.clone(),
-            div = divProto.clone(),
-            _toggle = function() {
-                ul.toggle();
-                link.toggleClass('open close');
-            };
+  document.head.appendChild(style);
 
-        ul.find('li a').each(function() {
-            if ($(this).attr('href')) {
-                $(this).attr('href', uri +$(this).attr('href'));
-            }
-        });
+  blurbs.forEach(blurb => {
 
-        link.add(ul.find('li a').last()).click(_toggle);
+    const titleLink = blurb.querySelector('.header.module .heading a');
+    const title = titleLink.textContent.trim();
+    const workId = titleLink.href
+      .match(/\/works\/(\d+)\b/)[1];
+    const formats = ['azw3', 'epub', 'mobi', 'pdf', 'html'];
+    const tuples = formats
+      .map(ext => [
+        ext.toUpperCase(),
+        `/downloads/${workId}/${encodeURIComponent(title)}.${ext}?updated_at=${Date.now()}`
+      ]);
 
-        div.append(link, ul.hide())
-            .appendTo(work);
+    blurb.innerHTML += `
+      <div class="download actions" aria-haspopup="true">
+        <a href="#" class="collapsed">Download</a>
+        <ul class="expandable secondary hidden">
+          ${
+            tuples.map(([label, href]) => `
+              <li>
+                <a href=${href}>
+                  ${label}
+                </a>
+              </li>
+            `)
+            .join('')
+          }
+        </ul>
+      </div>
+    `;
+
+    blurb.querySelector('.download.actions > a').addEventListener('click', ev => {
+      const button = ev.currentTarget;
+
+      button.classList.toggle('collapsed');
+      button.classList.toggle('expanded');
+      button.parentNode
+        .querySelector('.expandable')
+        .classList.toggle('hidden');
+
+      ev.preventDefault();
     });
-
-})(window.jQuery);
+  });
+})();
