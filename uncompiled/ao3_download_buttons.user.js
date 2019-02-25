@@ -2,12 +2,12 @@
 // @name    ao3 download buttons
 // @description Adds download buttons to each work blurb on AO3's works index pages.
 // @namespace   ao3
-// @include   http*://archiveofourown.org/*works*
-// @include   http*://archiveofourown.org/series/*
-// @include   http*://archiveofourown.org/users/*/bookmarks*
-// @include   http*://archiveofourown.org/users/*/readings*
-// @grant     none
-// @version   2.0
+// @include     http*://archiveofourown.org/*works*
+// @include     http*://archiveofourown.org/series/*
+// @include     http*://archiveofourown.org/users/*/bookmarks*
+// @include     http*://archiveofourown.org/users/*/readings*
+// @grant       none
+// @version     2.0
 // @downloadURL https://github.com/tuff/tuff-userscripts/raw/master/uncompiled/ao3_download_buttons.user.js
 // ==/UserScript==
 
