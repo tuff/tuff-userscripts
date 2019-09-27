@@ -4,92 +4,55 @@ const gulp = require('gulp');
 const fs = require('fs');
 const path = require('path');
 const del = require('del');
-
-const rollup = require('rollup-stream');
-const buffer = require('vinyl-buffer');
-const source = require('vinyl-source-stream');
-
+const rollup = require('rollup');
 const rollupBabel   = require('rollup-plugin-babel');
-
-const header        = require('gulp-header');
-const rename        = require('gulp-rename');
-const sourcemaps    = require('gulp-sourcemaps');
-const iife          = require('gulp-iife');
-
 
 // tasks
 gulp.task('clean-dist', cleanDist);
 gulp.task('build-js', buildJs);
-gulp.task('watch', watch);
-gulp.task('default',['build-all', 'watch']);
-
-gulp.task('build-all', [
-  'clean-dist',
-  'build-js',
-]);
+gulp.task('watch', watchJs);
+gulp.task('build-all', gulp.series('clean-dist', 'build-js'));
+gulp.task('default', gulp.series('build-all', 'watch'));
 
 // functions
-function getSrcFolders() {
+async function cleanDist() {
+  await del.sync('dist/**/*');
+}
+
+async function rollupBuild(folderName) {
+  const inputFolder = `./src/${folderName}`;
+  const inputOptions = {
+    input: `${inputFolder}/index.js`,
+    plugins: [
+      rollupBabel({
+        exclude: 'node_modules/**',
+      })
+    ]
+  };
+  const outputOptions = {
+    file: `./dist/${folderName}.user.js`,
+    format: 'iife',
+    banner: () => fs.readFileSync(`${inputFolder}/header-comment.js`),
+  };
+
+  // create a bundle
+  const bundle = await rollup.rollup(inputOptions);
+
+  await bundle.write(outputOptions);
+}
+
+async function buildJs() {
   const srcDir = 'src';
 
-  return fs.readdirSync(srcDir)
-    .filter(function(file) {
-      return fs.statSync(path.join(srcDir, file)).isDirectory();
-    });
-}
+  const srcFolders = fs.readdirSync(srcDir)
+    .filter(file => fs.statSync(path.join(srcDir, file)).isDirectory());
 
-function cleanDist() {
-  return del.sync('dist/**/*');
-}
-
-function buildJsFolder(name) {
-  return function() {
-    const path = 'src/' + name;
-    const targetName = name + '.user.js';
-
-    return rollup({
-        entry: path + '/index.js',
-        sourceMap: true,
-        plugins: [
-          rollupBabel({
-            exclude: 'node_modules/**',
-          })
-        ]
-      })
-      .pipe(source('index.js', path))
-      .pipe(buffer())
-      .pipe(sourcemaps.init({loadMaps: true}))
-      .on('error', onError)
-      .pipe(iife({useStrict: false}))
-      .pipe(rename(targetName))
-      .pipe(sourcemaps.write('.'))
-      .pipe(header(
-        fs.readFileSync(path + '/header-comment.js', 'utf8')
-      ))
-      .pipe(gulp.dest('dist'));
+  for (const folder of srcFolders) {
+    await rollupBuild(folder);
   }
 }
 
-function buildJs() {
-  return getSrcFolders()
-    .map(buildJsFolder)
-    .forEach(buildFolderFn => buildFolderFn());
-}
-
-function watch() {
-  watchJs();
-}
-
 function watchJs() {
-  gulp.watch('src/**/*.js', ['build-js'])
-    .on('change', onFileChange);
-}
-
-function onError(err) {
-  console.log(err);
-  this.emit('end');
-}
-
-function onFileChange(file) {
-  console.log(`File changed: ${file.path}`);
+  gulp.watch('src/**/*.js', buildJs)
+    .on('change', file => console.log('File changed:', file));
 }
