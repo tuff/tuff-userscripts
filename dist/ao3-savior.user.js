@@ -10,7 +10,7 @@
 
 
 ;(function() {
-var STYLE = '\n  html body .ao3-savior-hidden {\n    display: none;\n  }\n  \n  .ao3-savior-cut {\n    display: none;\n  }\n  \n  .ao3-savior-cut::after {\n    clear: both;\n    content: \'\';\n    display: block;\n  }\n  \n  .ao3-savior-reason {\n    margin-left: 5px;\n  }\n  \n  .ao3-savior-hide-reasons .ao3-savior-reason {\n    display: none;\n  }\n  \n  .ao3-savior-unhide .ao3-savior-cut {\n    display: block;\n  }\n  \n  .ao3-savior-fold {\n    align-items: center;\n    display: flex;\n    justify-content: flex-start;\n  }\n  \n  .ao3-savior-unhide .ao3-savior-fold {\n    background: #ffc68e;\n  }\n  \n  button.ao3-savior-toggle {\n    margin-left: auto;\n  }\n';
+var STYLE = '\n  html body .ao3-savior-hidden {\n    display: none;\n  }\n  \n  .ao3-savior-cut {\n    display: none;\n  }\n  \n  .ao3-savior-cut::after {\n    clear: both;\n    content: \'\';\n    display: block;\n  }\n  \n  .ao3-savior-reason {\n    margin-left: 5px;\n  }\n  \n  .ao3-savior-hide-reasons .ao3-savior-reason {\n    display: none;\n  }\n  \n  .ao3-savior-unhide .ao3-savior-cut {\n    display: block;\n  }\n  \n  .ao3-savior-fold {\n    align-items: center;\n    display: flex;\n    justify-content: flex-start;\n  }\n  \n  .ao3-savior-unhide .ao3-savior-fold {\n    border-bottom: 1px dashed;\n    margin-bottom: 15px;\n    padding-bottom: 5px;\n  }\n  \n  button.ao3-savior-toggle {\n    margin-left: auto;\n  }\n';
 
 function addStyle() {
   var style = document.createElement('style');
@@ -66,7 +66,7 @@ var getToggleButton = function getToggleButton() {
       event.target.innerHTML = 'Unhide';
     } else {
       work.className += unhideClassFragment;
-      work.querySelector('.' + CSS_NAMESPACE + '-note').innerHTML = 'This work was hidden.';
+      work.querySelector('.' + CSS_NAMESPACE + '-note').innerHTML = 'ℹ️ This work was hidden.';
       event.target.innerHTML = 'Hide';
     }
   });
