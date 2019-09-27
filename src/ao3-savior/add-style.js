@@ -32,7 +32,9 @@ const STYLE = `
   }
   
   .ao3-savior-unhide .ao3-savior-fold {
-    background: #ffc68e;
+    border-bottom: 1px dashed;
+    margin-bottom: 15px;
+    padding-bottom: 5px;
   }
   
   button.ao3-savior-toggle {
