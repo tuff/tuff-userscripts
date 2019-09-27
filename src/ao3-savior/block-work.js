@@ -42,7 +42,7 @@ const getToggleButton = () => {
       event.target.innerHTML = 'Unhide';
     } else {
       work.className += unhideClassFragment;
-      work.querySelector(`.${CSS_NAMESPACE}-note`).innerHTML = 'This work was hidden.';
+      work.querySelector(`.${CSS_NAMESPACE}-note`).innerHTML = 'ℹ️ This work was hidden.';
       event.target.innerHTML = 'Hide';
     }
   });
