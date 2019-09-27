@@ -13,14 +13,12 @@ const rollupBabel   = require('rollup-plugin-babel');
 
 const header        = require('gulp-header');
 const rename        = require('gulp-rename');
-const sass          = require('gulp-sass');
 const sourcemaps    = require('gulp-sourcemaps');
 const iife          = require('gulp-iife');
 
 
 // tasks
 gulp.task('clean-dist', cleanDist);
-gulp.task('build-sass', buildSass);
 gulp.task('build-js', buildJs);
 gulp.task('watch', watch);
 gulp.task('default',['build-all', 'watch']);
@@ -28,7 +26,6 @@ gulp.task('default',['build-all', 'watch']);
 gulp.task('build-all', [
   'clean-dist',
   'build-js',
-  'build-sass',
 ]);
 
 // functions
@@ -43,16 +40,6 @@ function getSrcFolders() {
 
 function cleanDist() {
   return del.sync('dist/**/*');
-}
-
-function buildSass() {
-  return gulp.src('sass/app-index.scss')
-    .pipe(sourcemaps.init())
-    .pipe(sass().on('error', sass.logError))
-    .on('error', onError)
-    .pipe(rename('app.css'))
-    .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest('dist/'));
 }
 
 function buildJsFolder(name) {
@@ -90,13 +77,7 @@ function buildJs() {
 }
 
 function watch() {
-  watchSass();
   watchJs();
-}
-
-function watchSass() {
-  gulp.watch('**/*.scss', ['build-sass'])
-    .on('change', onFileChange);
 }
 
 function watchJs() {
