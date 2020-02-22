@@ -7,8 +7,7 @@
 // @include     http*://archiveofourown.org/users/*/bookmarks*
 // @include     http*://archiveofourown.org/users/*/readings*
 // @grant       none
-// @version     2.0
-// @downloadURL https://github.com/tuff/tuff-userscripts/raw/master/uncompiled/ao3_download_buttons.user.js
+// @version     2.1
 // ==/UserScript==
 
 (function () {
@@ -43,11 +42,22 @@
   document.head.appendChild(style);
 
   blurbs.forEach(blurb => {
+    let workId;
+    let title;
 
-    const titleLink = blurb.querySelector('.header.module .heading a');
-    const title = titleLink.textContent.trim();
-    const workId = titleLink.href
-      .match(/\/works\/(\d+)\b/)[1];
+    try {
+      const titleLink = blurb.querySelector('.header.module .heading a');
+
+      title = titleLink.textContent.trim();
+      workId = (titleLink.href.match(/\/works\/(\d+)\b/) || [])[1];
+    } catch (ex) {
+    }
+    
+    if (!workId) {
+      console.log('[ao3 download buttons] - skipping non-downloadable blurb:', blurb);
+      return;
+    }
+
     const formats = ['azw3', 'epub', 'mobi', 'pdf', 'html'];
     const tuples = formats
       .map(ext => [
