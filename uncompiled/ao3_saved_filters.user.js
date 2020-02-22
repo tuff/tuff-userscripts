@@ -5,7 +5,6 @@
 // @include     http*://archiveofourown.org/*works*
 // @grant       none
 // @version     1.3
-// @downloadURL https://github.com/tuff/tuff-userscripts/raw/master/uncompiled/ao3_saved_filters.user.js
 // ==/UserScript==
 
 (function($) {
@@ -74,8 +73,16 @@
             $('<div>').addClass(cls)
                 .prepend(title)
                 .append(ta.removeClass(),
-                    $('<input>').attr({'type': 'checkbox', 'id': 'toggle-'+cls}),
-                    $('<label>').attr('for', 'toggle-'+cls).text('Enabled'),
+                    $('<label>').text('Enabled')
+                      .prepend(
+                        $('<input>').attr({'type': 'checkbox'})
+                          .css({
+                            clip: 'auto',
+                            'margin-right': '0.3em',
+                            position: 'relative',
+                            width: 'auto',
+                          })
+                      ),
                     $('<a>').addClass('action').text('Save')
                 ).appendTo(container);
         });
