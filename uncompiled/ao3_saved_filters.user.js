@@ -4,7 +4,7 @@
 // @namespace   ao3
 // @include     http*://archiveofourown.org/*works*
 // @grant       none
-// @version     1.3
+// @version     1.4
 // ==/UserScript==
 
 (function($) {
