@@ -44,18 +44,29 @@ export default function getBlockReason(
   }
 ) {
 
-  if (isTagWhitelisted(tags, tagWhitelist)) return null;
+  if (isTagWhitelisted(tags, tagWhitelist)) {
+    return null;
+  }
 
-  const tag = findBlacklistedItem(tags, tagBlacklist, matchTermsWithWildCard);
-  if (tag) return {tag};
+  const blockedTag = findBlacklistedItem(tags, tagBlacklist, matchTermsWithWildCard);
+  if (blockedTag) {
+    return {tag: blockedTag};
+  }
 
   const author = findBlacklistedItem(authors, authorBlacklist, equals);
-  if (author) return {author};
+  if (author) {
+    return {author};
+  }
 
-  if (titleBlacklist.some(entry => title === entry)) return {title};
+  const blockedTitle = findBlacklistedItem([title], titleBlacklist, matchTermsWithWildCard);
+  if (blockedTitle) {
+    return {title: blockedTitle};
+  }
 
   const summaryTerm = findBlacklistedItem([summary], summaryBlacklist, contains);
-  if (summaryTerm) return {summary: summaryTerm};
+  if (summaryTerm) {
+    return {summary: summaryTerm};
+  }
 
   return null;
 }

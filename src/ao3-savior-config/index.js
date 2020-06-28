@@ -21,10 +21,11 @@ window.ao3SaviorConfig = {
     'smeyer',
   ],
 
-  // Excludes works with a title that exactly matches at least one term
+  // Excludes works with a title that matches at least one term. Use * for wildcard.
   titleBlacklist: [
     'The Catcher in the Rye',
     'Sylvester And The Magic Pebble',
+    'Five times*',
   ],
 
   // Exclude works with a tag that matches at least one term. Use * for wildcard.

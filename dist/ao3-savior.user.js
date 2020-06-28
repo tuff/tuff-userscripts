@@ -199,20 +199,29 @@
         summaryBlacklist = _ref2$summaryBlacklis === undefined ? [] : _ref2$summaryBlacklis;
 
 
-    if (isTagWhitelisted(tags, tagWhitelist)) return null;
+    if (isTagWhitelisted(tags, tagWhitelist)) {
+      return null;
+    }
 
-    var tag = findBlacklistedItem(tags, tagBlacklist, matchTermsWithWildCard);
-    if (tag) return { tag: tag };
+    var blockedTag = findBlacklistedItem(tags, tagBlacklist, matchTermsWithWildCard);
+    if (blockedTag) {
+      return { tag: blockedTag };
+    }
 
     var author = findBlacklistedItem(authors, authorBlacklist, equals);
-    if (author) return { author: author };
+    if (author) {
+      return { author: author };
+    }
 
-    if (titleBlacklist.some(function (entry) {
-      return title === entry;
-    })) return { title: title };
+    var blockedTitle = findBlacklistedItem([title], titleBlacklist, matchTermsWithWildCard);
+    if (blockedTitle) {
+      return { title: blockedTitle };
+    }
 
     var summaryTerm = findBlacklistedItem([summary], summaryBlacklist, contains);
-    if (summaryTerm) return { summary: summaryTerm };
+    if (summaryTerm) {
+      return { summary: summaryTerm };
+    }
 
     return null;
   }
