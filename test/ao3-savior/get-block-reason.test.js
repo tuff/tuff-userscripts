@@ -4,6 +4,22 @@ let expect = require('chai').expect;
 
 describe('getBlockReasons', () => {
   it('should support tag blacklisting', () => {
+    const unwanted = 'spiders';
+    const hit = {
+      tags: ['slugs', 'bugs', 'spiders']
+    };
+    const miss = {
+      tags: ['slugs', 'bugs']
+    };
+    const blacklists = {
+      tagBlacklist: [unwanted],
+    };
+
+    expect( getBlockReason(hit, blacklists).tag ).to.equal(unwanted);
+    expect( getBlockReason(miss, blacklists) ).to.equal(null);
+  });
+
+  it('should support tag blacklisting with wildcard', () => {
     const unwanted = 'creepy *';
     const hit = {
       tags: ['slugs', 'bugs', 'creepy crawlies']
@@ -59,6 +75,22 @@ describe('getBlockReasons', () => {
     };
     const blacklists = {
       titleBlacklist: [unwanted, 'Sylvester And The Magic Pebble']
+    };
+
+    expect( getBlockReason(hit, blacklists).title ).to.equal(unwanted);
+    expect( getBlockReason(miss, blacklists) ).to.equal(null);
+  });
+
+  it('should support title blacklisting with wildcard', () => {
+    const unwanted = '*ghost*';
+    const hit = {
+      title: 'The Ghost and Mrs Muir'
+    };
+    const miss = {
+      title: 'A Wizard of Earthsea'
+    };
+    const blacklists = {
+      titleBlacklist: [unwanted, 'irrelevant']
     };
 
     expect( getBlockReason(hit, blacklists).title ).to.equal(unwanted);

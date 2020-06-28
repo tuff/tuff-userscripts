@@ -4,7 +4,7 @@
 // @namespace     ao3
 // @include       http*://archiveofourown.org/*
 // @grant         none
-// @version       1.13.1
+// @version       1.14
 // @downloadURL   https://github.com/tuff/tuff-userscripts/raw/master/dist/ao3-savior.user.js
 // ==/UserScript==
 
@@ -199,20 +199,29 @@
         summaryBlacklist = _ref2$summaryBlacklis === undefined ? [] : _ref2$summaryBlacklis;
 
 
-    if (isTagWhitelisted(tags, tagWhitelist)) return null;
+    if (isTagWhitelisted(tags, tagWhitelist)) {
+      return null;
+    }
 
-    var tag = findBlacklistedItem(tags, tagBlacklist, matchTermsWithWildCard);
-    if (tag) return { tag: tag };
+    var blockedTag = findBlacklistedItem(tags, tagBlacklist, matchTermsWithWildCard);
+    if (blockedTag) {
+      return { tag: blockedTag };
+    }
 
     var author = findBlacklistedItem(authors, authorBlacklist, equals);
-    if (author) return { author: author };
+    if (author) {
+      return { author: author };
+    }
 
-    if (titleBlacklist.some(function (entry) {
-      return title === entry;
-    })) return { title: title };
+    var blockedTitle = findBlacklistedItem([title], titleBlacklist, matchTermsWithWildCard);
+    if (blockedTitle) {
+      return { title: blockedTitle };
+    }
 
     var summaryTerm = findBlacklistedItem([summary], summaryBlacklist, contains);
-    if (summaryTerm) return { summary: summaryTerm };
+    if (summaryTerm) {
+      return { summary: summaryTerm };
+    }
 
     return null;
   }

@@ -33,8 +33,8 @@
     // Exclude works with an author that exactly matches at least one term.
     authorBlacklist: ['Hated Author 1', 'smeyer'],
 
-    // Excludes works with a title that exactly matches at least one term
-    titleBlacklist: ['The Catcher in the Rye', 'Sylvester And The Magic Pebble'],
+    // Excludes works with a title that matches at least one term. Use * for wildcard.
+    titleBlacklist: ['The Catcher in the Rye', 'Sylvester And The Magic Pebble', 'Five times*'],
 
     // Exclude works with a tag that matches at least one term. Use * for wildcard.
     tagBlacklist: ['dobby', 'jar jar binks', '*mimes'],
