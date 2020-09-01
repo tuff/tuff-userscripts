@@ -1,3 +1,5 @@
+
+
 // ==UserScript==
 // @name        Day pass poller
 // @description Day pass poller
@@ -69,21 +71,14 @@ async function __tuff_onPollSuccess(response, pollArgs) {
     return;
   }
 
-  console.log(`ℹ️ POLL ${_tries}`, response, pollArgs);
+  console.log(`ℹ️ POLL ${pollArgs._tries}`, response, pollArgs);
   
   if (response.d.Status == '-1') {
-    $('#messageBoxLightbox2').css('z-index', 1300);
-    $('#messageBoxLightbox2 .modal-body').html(
-      `${response.d.Msg}<br><br>⏳ POLL COUNT: ${_tries}`
-    );
-    $('#messageBoxLightbox2 .modal-title').html('Information');
-    $('#messageBoxLightbox2').modal();
-
     await new Promise(res => setTimeout(res, POLL_DELAY));
 
     __tuff_pollForPasses({
       ...pollArgs,
-      _tries: _tries + 1,
+      _tries: pollArgs._tries + 1,
     });
   } else {
     alert(`💩 SOLD OUT 💩`);
@@ -104,29 +99,20 @@ function __tuff_scrapePassData() {
   const data = titleDivs.map(div => {
     const parent = div.closest('.faq_main_box_div');
     const title = div.textContent.trim();
+    const membershipId = div.id.replace('tit_', '');
+    const qtyInput = parent.querySelector('.passQty');
     const cartLink = parent.querySelector('.add_cart_card > a');
-    let passData = {
+    const passType = Boolean(qtyInput) ? 2 : 1;
+    const placeParent = parent.closest('.card .collapse');
+    const placeId = placeParent.id.replace('collapse_', '');
+
+    return {
       title,
-      available: false,
-      membershipId: null,
-      passType: null,
-      placeId: null,
+      available: Boolean(cartLink),
+      membershipId,
+      passType,
+      placeId,
     };
-
-    if (cartLink) {
-      const onclick = cartLink.getAttribute('onclick');
-      const [, membershipId, passType, placeId] = onclick.match(/\((\d+),(\d+),(\d+),this/i);
-
-      passData = {
-        ...passData,
-        available: true,
-        membershipId,
-        passType,
-        placeId,
-      };
-    }
-
-    return passData;
   });
   
   return data;
@@ -210,7 +196,7 @@ async function __tuff_printServerTime() {
   console.log('SERVER TIME', diffMs, (new Date(adjustedServerTime)));
 
   setInterval(() => {
-    const date = new Date(Date.now() - diffMs);
+    const date = new Date(Date.now() + diffMs);
 
     timeDiv.textContent = date.toLocaleTimeString(); 
   }, 1000); 
