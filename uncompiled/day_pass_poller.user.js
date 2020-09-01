@@ -96,7 +96,6 @@ async function __tuff_onPollSuccess(response, pollArgs) {
     );
     $('#messageBoxLightbox2 .modal-title').html('Information');
     $('#messageBoxLightbox2').modal();
-    $(thisobj).html('ADD TO CART');
   }
 }
 
