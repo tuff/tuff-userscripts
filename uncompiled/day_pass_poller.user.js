@@ -210,7 +210,7 @@ async function __tuff_printServerTime() {
   console.log('SERVER TIME', diffMs, (new Date(adjustedServerTime)));
 
   setInterval(() => {
-    const date = new Date(Date.now() + diffMs);
+    const date = new Date(Date.now() - diffMs);
 
     timeDiv.textContent = date.toLocaleTimeString(); 
   }, 1000); 
