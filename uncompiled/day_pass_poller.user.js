@@ -1,5 +1,3 @@
-
-
 // ==UserScript==
 // @name        Day pass poller
 // @description Day pass poller
@@ -189,14 +187,15 @@ async function __tuff_printServerTime() {
   const response = await fetch(window.location.origin);
   const responseTime = Date.now() - start;
   const dateHeader = response.headers.get('date');
-  const adjustedServerTime = (new Date(dateHeader)).getTime() + responseTime + 1000; 
+  const adjustedServerTime = (new Date(dateHeader)).getTime() + responseTime; 
   const diffMs = Date.now() - adjustedServerTime;
   const timeDiv = document.querySelector('.js-tuff-server-time');
+  const buffer = 3000;
 
   console.log('SERVER TIME', diffMs, (new Date(adjustedServerTime)));
 
   setInterval(() => {
-    const date = new Date(Date.now() + diffMs);
+    const date = new Date(Date.now() + buffer - diffMs);
 
     timeDiv.textContent = date.toLocaleTimeString(); 
   }, 1000); 
