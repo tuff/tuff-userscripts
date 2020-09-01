@@ -8,7 +8,7 @@
 // ==/UserScript==
 
 const DEFAULT_QUANTITY = 2;
-const POLL_DELAY = 1000;
+const POLL_DELAY = 500;
 const DEFAULT_OPTION_SEARCH = 
   localStorage.__tuff_DEFAULT_OPTION_SEARCH || 'Rubble Creek Trailhead'; 
 
@@ -142,6 +142,7 @@ function __tuff_addUi() {
 
   const data = __tuff_scrapePassData();
   const wrapper = document.createElement('div');
+  const timeDiv = document.createElement('div');
   const style = document.createElement('style');
   const select = document.createElement('select');
   const quantityInput = document.createElement('input');
@@ -184,13 +185,36 @@ function __tuff_addUi() {
   quantityInput.setAttribute('min', 1);
   wrapper.appendChild(quantityInput);
 
+  timeDiv.classList.add('js-tuff-server-time');
+  wrapper.appendChild(timeDiv);
+
   pollButton.type = 'button';
   pollButton.innerHTML = `🧵 POLL <span class="js-tuff-poll-count"></span>`;
   pollButton.addEventListener('click', __tuff_onClickPollButton);
   wrapper.appendChild(pollButton);
 
   document.body.appendChild(wrapper);
+
+  __tuff_printServerTime();
 };
+
+async function __tuff_printServerTime() {
+  const start = Date.now();
+  const response = await fetch(window.location.origin);
+  const responseTime = Date.now() - start;
+  const dateHeader = response.headers.get('date');
+  const adjustedServerTime = (new Date(dateHeader)).getTime() - responseTime; 
+  const diffMs = Date.now() - adjustedServerTime;
+  const timeDiv = document.querySelector('.js-tuff-server-time');
+
+  console.log('SERVER TIME', diffMs, (new Date(adjustedServerTime)));
+
+  setInterval(() => {
+    const date = new Date(Date.now() - diffMs);
+
+    timeDiv.textContent = date.toLocaleTimeString(); 
+  }, 1000); 
+}
 
 function __tuff_onClickPollButton() {
   const selectValue = document.querySelector('.tuff-wrapper select').value;
