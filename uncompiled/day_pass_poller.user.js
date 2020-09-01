@@ -7,12 +7,12 @@
 // @version     0.1
 // ==/UserScript==
 
-var __tuff_DEFAULT_QUANTITY = 2;
-var __tuff_POLL_DELAY = 1000;
-var __tuff_DEFAULT_OPTION_SEARCH = 
-  localStorage.__tuff_DEFAULT_OPTION_SEARCH || 'Rubble Creek Trailhead';
+const DEFAULT_QUANTITY = 2;
+const POLL_DELAY = 1000;
+const DEFAULT_OPTION_SEARCH = 
+  localStorage.__tuff_DEFAULT_OPTION_SEARCH || 'Rubble Creek Trailhead'; 
 
-var __tuff_CSS = `
+const __tuff_CSS = `
   body.tuff {
     padding-bottom: 600px;
   }
@@ -35,7 +35,7 @@ var __tuff_CSS = `
   }
 `;
 
-var __tuff_data = {};
+let __tuff_data = {};
 
 function __tuff_pollForPasses(args) {
   var {membershipId, qty, passType = 2, placeId} = args;
@@ -79,7 +79,7 @@ async function __tuff_onPollSuccess(response, pollArgs) {
     $('#messageBoxLightbox2 .modal-title').html('Information');
     $('#messageBoxLightbox2').modal();
 
-    await new Promise(res => setTimeout(res, __tuff_POLL_DELAY));
+    await new Promise(res => setTimeout(res, POLL_DELAY));
 
     __tuff_pollForPasses({
       ...pollArgs,
@@ -133,7 +133,7 @@ function __tuff_scrapePassData() {
   return data;
 }
 
-function __tuff_addDayPassesUi() {
+function __tuff_addUi() {
   const needsLogin = Boolean(document.querySelector('#aLogin'));
 
   if (needsLogin) {
@@ -153,6 +153,8 @@ function __tuff_addDayPassesUi() {
     [item.title]: item,
   }), {});
 
+  console.log('__tuff_data', __tuff_data);
+
   const options = data.map(item => {
     const option = document.createElement('option');
 
@@ -165,7 +167,7 @@ function __tuff_addDayPassesUi() {
   options.forEach(option => {
     select.appendChild(option);
 
-    if (!option.disabled && option.textContent.includes(__tuff_DEFAULT_OPTION_SEARCH)) {
+    if (!option.disabled && option.textContent.includes(DEFAULT_OPTION_SEARCH)) {
       option.selected = true;
     }
   });
@@ -178,7 +180,7 @@ function __tuff_addDayPassesUi() {
   wrapper.classList.add('tuff-wrapper');
 
   quantityInput.type = 'number';
-  quantityInput.value = __tuff_DEFAULT_QUANTITY;
+  quantityInput.value = DEFAULT_QUANTITY;
   quantityInput.setAttribute('max', 8);
   quantityInput.setAttribute('min', 1);
   wrapper.appendChild(quantityInput);
@@ -192,9 +194,15 @@ function __tuff_addDayPassesUi() {
 };
 
 function __tuff_onClickPollButton() {
-  const qty = document.querySelector('.tuff-wrapper input').value;
   const selectValue = document.querySelector('.tuff-wrapper select').value;
   const { membershipId, passType, placeId } = __tuff_data[selectValue];
+  const quantityInput = document.querySelector('.tuff-wrapper input');
+
+  if (passType == 1) {
+    quantityInput.value = 1;
+  }
+
+  const qty = quantityInput.value;
 
   localStorage.__tuff_DEFAULT_OPTION_SEARCH = selectValue;
 
@@ -207,4 +215,4 @@ function __tuff_onClickPollButton() {
   });
 };
 
-__tuff_addDayPassesUi();
+__tuff_addUi();
