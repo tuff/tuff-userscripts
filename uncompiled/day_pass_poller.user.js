@@ -186,10 +186,7 @@ function __tuff_addUi() {
 async function __tuff_printServerTime() {
   const start = Date.now();
   const origin = `//${window.location.hostname}`.replace(/(www\.)|^/, 'www.');
-  const response = await fetch(origin, {
-    method: 'HEAD',
-    mode: 'cors',
-  });
+  const response = await fetch(origin, { method: 'HEAD' });
   const responseTime = Date.now() - start;
   const dateHeader = response.headers.get('date');
   const adjustedServerTime = (new Date(dateHeader)).getTime() + responseTime;
