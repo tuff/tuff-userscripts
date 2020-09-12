@@ -5,13 +5,27 @@
 // @include     https://*.discovercamping.ca/BCCWeb/Memberships/MembershipPasses.aspx
 // @include     https://discovercamping.ca/BCCWeb/Memberships/MembershipPasses.aspx
 // @grant       none
-// @version     0.1
+// @version     0.2
 // ==/UserScript==
 
 const DEFAULT_QUANTITY = 2;
-const POLL_DELAY = 500;
+const POLL_DELAY = 200;
 const DEFAULT_OPTION_SEARCH =
   localStorage.__tuff_DEFAULT_OPTION_SEARCH || 'Rubble Creek Trailhead';
+
+const POLL_LEAD_MS = 5 * 1000;
+const LOGIN_DURATION_MS = 1000 * 60 * 14;
+
+const SIX_AM_MS = (() => {
+  const date = new Date();
+  
+  date.setHours(6);
+  date.setMinutes(0);
+  date.setSeconds(0);
+  date.setMilliseconds(0);
+
+  return date.getTime();
+})();
 
 const __tuff_CSS = `
   body.tuff {
@@ -36,37 +50,54 @@ const __tuff_CSS = `
   }
 `;
 
+let __serverTimeMs;
 let __tuff_data = {};
 
-function __tuff_pollForPasses(args) {
-  var { membershipId, qty, passType = 2, placeId } = args;
+async function __tuff_pollForPasses(args) {
+  const { membershipId, qty, passType = 2, placeId } = args;
+  const diff = __serverTimeMs - SIX_AM_MS;
+  const shouldRequest = diff > -POLL_LEAD_MS;
+  const serverDate = new Date(__serverTimeMs);
 
-  document.querySelector('.js-tuff-poll-count').textContent = args._tries;
+  document.querySelector('.js-tuff-poll-count').textContent = args._tries + 
+    (shouldRequest ? '' : '*');
 
-  $.ajax({
-    type: 'POST',
-    url: 'MembershipPasses.aspx/MembershipAddToCart',
-    data: JSON.stringify({
-      data: {
-        membershipId,
-        qty,
-        passType,
-        placeId,
-      },
-    }),
-    contentType: 'application/json; charset=utf-8',
-    dataType: 'json',
-    success: response => __tuff_onPollSuccess(response, args),
-    error: () => alert('error'),
-    failure: () => alert('failure'),
-  });
+  if (shouldRequest) {
+    console.log('Requesting', diff, serverDate);
+
+    $.ajax({
+      type: 'POST',
+      url: 'MembershipPasses.aspx/MembershipAddToCart',
+      data: JSON.stringify({
+        data: {
+          membershipId,
+          qty,
+          passType,
+          placeId,
+        },
+      }),
+      contentType: 'application/json; charset=utf-8',
+      dataType: 'json',
+      success: response => __tuff_onPollSuccess(response, args),
+      error: () => alert('error'),
+      failure: () => alert('failure'),
+    });
+    
+    return;
+  }
+
+  const wait = Math.min(POLL_LEAD_MS, Math.abs(diff));
+
+  console.log('Waiting to request', diff, serverDate);
+  await new Promise(res => setTimeout(res, wait));
+  __tuff_pollForPasses({ ...args, _tries: args._tries + 1 });
 }
 
 async function __tuff_onPollSuccess(response, pollArgs) {
   if (response.d.Status == '1') {
     alert(`⭐ SUCCESS ⭐`);
 
-    window.location.href = 'https://www.discovercamping.ca/BCCWeb/Customers/ShoppingCart.aspx';
+    window.location.pathname = '/BCCWeb/Customers/ShoppingCart.aspx';
     return;
   }
 
@@ -138,8 +169,6 @@ function __tuff_addUi() {
     [item.title]: item,
   }), {});
 
-  console.log('__tuff_data', __tuff_data);
-
   const options = data.map(item => {
     const option = document.createElement('option');
 
@@ -173,6 +202,8 @@ function __tuff_addUi() {
   timeDiv.classList.add('js-tuff-server-time');
   wrapper.appendChild(timeDiv);
 
+  pollButton.classList.add('js-tuff-poll-button');
+  pollButton.disabled = true;
   pollButton.type = 'button';
   pollButton.innerHTML = `🧵 POLL <span class="js-tuff-poll-count"></span>`;
   pollButton.addEventListener('click', __tuff_onClickPollButton);
@@ -180,30 +211,36 @@ function __tuff_addUi() {
 
   document.body.appendChild(wrapper);
 
-  __tuff_printServerTime();
+  __tuff_updateServerTime();
 };
 
-async function __tuff_printServerTime() {
+async function __tuff_updateServerTime() {
   const start = Date.now();
-  const origin = `//${window.location.hostname}`.replace(/(www\.)|^/, 'www.');
-  const response = await fetch(origin, { method: 'HEAD' });
+  const response = await fetch('', { method: 'HEAD' });
   const responseTime = Date.now() - start;
   const dateHeader = response.headers.get('date');
-  const adjustedServerTime = (new Date(dateHeader)).getTime() + responseTime;
-  const diffMs = Date.now() - adjustedServerTime;
+  const adjustedServerTimeMs = (new Date(dateHeader)).getTime() + responseTime;
+  const diffMs = Date.now() - adjustedServerTimeMs;
   const timeDiv = document.querySelector('.js-tuff-server-time');
-  const buffer = 3000;
 
-  console.log('SERVER TIME', diffMs, (new Date(adjustedServerTime)));
+  document.querySelector('.js-tuff-poll-button').disabled = false;
 
   setInterval(() => {
-    const date = new Date(Date.now() + buffer - diffMs);
+    __serverTimeMs = Date.now() - diffMs;
 
-    timeDiv.textContent = date.toLocaleTimeString();
+    timeDiv.textContent = (new Date(__serverTimeMs)).toLocaleTimeString();
   }, 1000);
 }
 
 function __tuff_onClickPollButton() {
+  const loginTime = SIX_AM_MS - LOGIN_DURATION_MS;
+
+  if (Date.now() < loginTime) {
+    alert(`✋ Log in and begin polling after ${(new Date(loginTime)).toLocaleTimeString()}.`);
+    return;
+  }
+
+
   const selectValue = document.querySelector('.tuff-wrapper select').value;
   const { membershipId, passType, placeId } = __tuff_data[selectValue];
   const quantityInput = document.querySelector('.tuff-wrapper input');
@@ -215,6 +252,8 @@ function __tuff_onClickPollButton() {
   const qty = quantityInput.value;
 
   localStorage.__tuff_DEFAULT_OPTION_SEARCH = selectValue;
+
+  document.querySelector('.js-tuff-poll-button').disabled = true;
 
   __tuff_pollForPasses({
     _tries: 0,
