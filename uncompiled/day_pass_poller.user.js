@@ -2,15 +2,16 @@
 // @name        Day pass poller
 // @description Day pass poller
 // @namespace   tuff
-// @include     https://www.discovercamping.ca/BCCWeb/Memberships/MembershipPasses.aspx
+// @include     https://*.discovercamping.ca/BCCWeb/Memberships/MembershipPasses.aspx
+// @include     https://discovercamping.ca/BCCWeb/Memberships/MembershipPasses.aspx
 // @grant       none
 // @version     0.1
 // ==/UserScript==
 
 const DEFAULT_QUANTITY = 2;
 const POLL_DELAY = 500;
-const DEFAULT_OPTION_SEARCH = 
-  localStorage.__tuff_DEFAULT_OPTION_SEARCH || 'Rubble Creek Trailhead'; 
+const DEFAULT_OPTION_SEARCH =
+  localStorage.__tuff_DEFAULT_OPTION_SEARCH || 'Rubble Creek Trailhead';
 
 const __tuff_CSS = `
   body.tuff {
@@ -38,7 +39,7 @@ const __tuff_CSS = `
 let __tuff_data = {};
 
 function __tuff_pollForPasses(args) {
-  var {membershipId, qty, passType = 2, placeId} = args;
+  var { membershipId, qty, passType = 2, placeId } = args;
 
   document.querySelector('.js-tuff-poll-count').textContent = args._tries;
 
@@ -70,7 +71,7 @@ async function __tuff_onPollSuccess(response, pollArgs) {
   }
 
   console.log(`ℹ️ POLL ${pollArgs._tries}`, response, pollArgs);
-  
+
   if (response.d.Status == '-1') {
     await new Promise(res => setTimeout(res, POLL_DELAY));
 
@@ -84,8 +85,8 @@ async function __tuff_onPollSuccess(response, pollArgs) {
     $('#messageBoxLightbox2').css('z-index', 1300);
     $('#messageBoxLightbox2 .modal-body').html(
       'The maximum number of ' +
-        response.d.Msg +
-        ' Permits have been issued for today.  Please consider a future date to visit the park.'
+      response.d.Msg +
+      ' Permits have been issued for today.  Please consider a future date to visit the park.'
     );
     $('#messageBoxLightbox2 .modal-title').html('Information');
     $('#messageBoxLightbox2').modal();
@@ -93,7 +94,7 @@ async function __tuff_onPollSuccess(response, pollArgs) {
 }
 
 function __tuff_scrapePassData() {
-  const titleDivs = [ ...document.querySelectorAll('[id^="tit_"][class^="bg_tit_card_"]') ];
+  const titleDivs = [...document.querySelectorAll('[id^="tit_"][class^="bg_tit_card_"]')];
   const data = titleDivs.map(div => {
     const parent = div.closest('.faq_main_box_div');
     const title = div.textContent.trim();
@@ -112,7 +113,7 @@ function __tuff_scrapePassData() {
       placeId,
     };
   });
-  
+
   return data;
 }
 
@@ -184,10 +185,14 @@ function __tuff_addUi() {
 
 async function __tuff_printServerTime() {
   const start = Date.now();
-  const response = await fetch(window.location.origin);
+  const origin = `//${window.location.hostname}`.replace(/(www\.)|^/, 'www.');
+  const response = await fetch(origin, {
+    method: 'HEAD',
+    mode: 'cors',
+  });
   const responseTime = Date.now() - start;
   const dateHeader = response.headers.get('date');
-  const adjustedServerTime = (new Date(dateHeader)).getTime() + responseTime; 
+  const adjustedServerTime = (new Date(dateHeader)).getTime() + responseTime;
   const diffMs = Date.now() - adjustedServerTime;
   const timeDiv = document.querySelector('.js-tuff-server-time');
   const buffer = 3000;
@@ -197,8 +202,8 @@ async function __tuff_printServerTime() {
   setInterval(() => {
     const date = new Date(Date.now() + buffer - diffMs);
 
-    timeDiv.textContent = date.toLocaleTimeString(); 
-  }, 1000); 
+    timeDiv.textContent = date.toLocaleTimeString();
+  }, 1000);
 }
 
 function __tuff_onClickPollButton() {
