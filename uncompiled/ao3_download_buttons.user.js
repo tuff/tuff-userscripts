@@ -3,9 +3,9 @@
 // @description Adds download buttons to each work blurb on AO3's works index pages.
 // @namespace   ao3
 // @include     http*://archiveofourown.org/*works*
+// @include     http*://archiveofourown.org/*bookmarks*
+// @include     http*://archiveofourown.org/*readings*
 // @include     http*://archiveofourown.org/series/*
-// @include     http*://archiveofourown.org/users/*/bookmarks*
-// @include     http*://archiveofourown.org/users/*/readings*
 // @grant       none
 // @version     2.1
 // ==/UserScript==
