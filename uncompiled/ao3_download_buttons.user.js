@@ -7,7 +7,7 @@
 // @include     http*://archiveofourown.org/*readings*
 // @include     http*://archiveofourown.org/series/*
 // @grant       none
-// @version     2.3
+// @version     2.4
 // ==/UserScript==
 
 (function () {
@@ -22,8 +22,8 @@
   style.innerHTML = `
     .blurb .download.actions {
       position: absolute;
-      right: 7em;
-      top: 0.5em;
+      right: 0.5em;
+      top: 2.2em;
       white-space: nowrap;
     }
 
@@ -36,6 +36,13 @@
     .blurb .download .expandable li {
       display: inline-block;
       margin: 0;
+    }
+
+    @media only screen and (min-width: 800px) {
+      .blurb .download.actions {
+        right: 7em;
+        top: 0.5em;
+      }
     }
   `;
 
