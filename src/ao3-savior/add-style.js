@@ -1,5 +1,5 @@
 const STYLE = `
-  html body .ao3-savior-hidden {
+  html body .ao3-savior-hidden.ao3-savior-hidden {
     display: none;
   }
   
