@@ -20,6 +20,7 @@
   },
   "scripts": {
     "test": "cross-env BABEL_ENV=test mocha",
+    "test:watch": "npm test -- --watch",
     "gulp": "gulp"
   }
 }
