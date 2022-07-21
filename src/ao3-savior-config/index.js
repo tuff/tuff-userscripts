@@ -35,6 +35,11 @@ window.ao3SaviorConfig = {
     '*mimes',
   ],
 
+  // Include works by these authors, even if they also match any of the blacklists.
+  authorWhitelist: [
+    'astolat',
+  ],
+
   // Include works matching these tags, even if they also match any of the blacklists.
   tagWhitelist: [
     'glitter',

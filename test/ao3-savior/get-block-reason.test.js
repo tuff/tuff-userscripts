@@ -65,6 +65,20 @@ describe('getBlockReasons', () => {
     expect( getBlockReason(miss, blacklists) ).to.equal(null);
   });
 
+  it('should support author whitelisting', () => {
+    const miss = {
+      title: 'Pygmalion',
+      authors: ['Jim', 'Jed', 'Jill']
+    };
+    const blacklists = {
+      authorBlacklist: ['Jim'],
+      authorWhitelist: ['Jed'],
+      titleBlacklist: ['Pygmalion', 'OK Computer'],
+    };
+
+    expect( getBlockReason(miss, blacklists) ).to.equal(null); 
+  });
+
   it('should support title blacklisting', () => {
     const unwanted = 'The Catcher in the Rye';
     const hit = {

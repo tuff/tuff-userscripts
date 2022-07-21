@@ -4,7 +4,7 @@
 // @namespace     ao3
 // @include       http*://archiveofourown.org/*
 // @grant         none
-// @version       1.15
+// @version       1.16
 // @downloadURL   https://github.com/tuff/tuff-userscripts/raw/master/dist/ao3-savior.user.js
 // ==/UserScript==
 
@@ -144,14 +144,14 @@
     return lastMatchedIndex >= 0;
   }
 
-  var isTagWhitelisted = function isTagWhitelisted(tags, whitelist) {
-    var whitelistLookup = whitelist.reduce(function (lookup, tag) {
-      lookup[tag] = true;
+  var isItemWhitelisted = function isItemWhitelisted(items, whitelist) {
+    var whitelistLookup = whitelist.reduce(function (lookup, item) {
+      lookup[item] = true;
       return lookup;
     }, {});
 
-    return tags.some(function (tag) {
-      return !!whitelistLookup[tag];
+    return items.some(function (item) {
+      return !!whitelistLookup[item];
     });
   };
 
@@ -193,13 +193,19 @@
         titleBlacklist = _ref2$titleBlacklist === undefined ? [] : _ref2$titleBlacklist,
         _ref2$tagBlacklist = _ref2.tagBlacklist,
         tagBlacklist = _ref2$tagBlacklist === undefined ? [] : _ref2$tagBlacklist,
+        _ref2$authorWhitelist = _ref2.authorWhitelist,
+        authorWhitelist = _ref2$authorWhitelist === undefined ? [] : _ref2$authorWhitelist,
         _ref2$tagWhitelist = _ref2.tagWhitelist,
         tagWhitelist = _ref2$tagWhitelist === undefined ? [] : _ref2$tagWhitelist,
         _ref2$summaryBlacklis = _ref2.summaryBlacklist,
         summaryBlacklist = _ref2$summaryBlacklis === undefined ? [] : _ref2$summaryBlacklis;
 
 
-    if (isTagWhitelisted(tags, tagWhitelist)) {
+    if (isItemWhitelisted(tags, tagWhitelist)) {
+      return null;
+    }
+
+    if (isItemWhitelisted(authors, authorWhitelist)) {
       return null;
     }
 

@@ -1,12 +1,12 @@
 import matchTermsWithWildCard from './match-terms-with-wildcard';
 
-const isTagWhitelisted = (tags, whitelist) => {
-  const whitelistLookup = whitelist.reduce((lookup, tag) => {
-    lookup[tag] = true;
+const isItemWhitelisted = (items, whitelist) => {
+  const whitelistLookup = whitelist.reduce((lookup, item) => {
+    lookup[item] = true;
     return lookup;
   }, {});
 
-  return tags.some(tag => !!whitelistLookup[tag]);
+  return items.some(item => !!whitelistLookup[item]);
 };
 
 const findBlacklistedItem = (list, blacklist, comparator) => {
@@ -39,12 +39,17 @@ export default function getBlockReason(
     authorBlacklist = [],
     titleBlacklist = [],
     tagBlacklist = [],
+    authorWhitelist = [],
     tagWhitelist = [],
     summaryBlacklist = [],
   }
 ) {
 
-  if (isTagWhitelisted(tags, tagWhitelist)) {
+  if (isItemWhitelisted(tags, tagWhitelist)) { 
+    return null;
+  }
+
+  if (isItemWhitelisted(authors, authorWhitelist)) {
     return null;
   }
 

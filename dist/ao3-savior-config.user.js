@@ -4,7 +4,7 @@
 // @namespace     ao3
 // @include       http*://archiveofourown.org/*
 // @grant         none
-// @version       1.1.1
+// @version       1.16
 // @downloadURL   https://github.com/tuff/tuff-userscripts/raw/master/dist/ao3-savior-config.user.js
 // ==/UserScript==
 
@@ -38,6 +38,9 @@
 
     // Exclude works with a tag that matches at least one term. Use * for wildcard.
     tagBlacklist: ['dobby', 'jar jar binks', '*mimes'],
+
+    // Include works by these authors, even if they also match any of the blacklists.
+    authorWhitelist: ['astolat'],
 
     // Include works matching these tags, even if they also match any of the blacklists.
     tagWhitelist: ['glitter'],
