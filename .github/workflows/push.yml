@@ -16,5 +16,5 @@ jobs:
         git config user.name "GitHub Actions"
         git config user.email "<>"
         git add dist/*
-        git commit -m "build (ci)"
+        git git diff-index --quiet HEAD || commit -m "build (ci)"
         git push
